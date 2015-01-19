@@ -1,3 +1,4 @@
+import re
 
 from tone import Tone, parse_tone
 
@@ -72,52 +73,5 @@ class Chord(object):
     def fold(self, axis):
         flipped_tones = {t.flip(axis) for t in self.tones}
         tones = self.tones.union(flipped_tones)
-        return Chord(tones, self.length, self.dots)
-
-
-def reverse_notes(notes):
-    return list(reversed(notes))
-
-
-def vertical_fold(notes):
-    return notes + reverse_notes(notes)
-
-
-def repeated_vertical_fold(notes, repetitions):
-    reversed_notes = reverse_notes(notes)
-    result = list(notes)
-    for r in range(repetitions):
-        if r % 2 == 0:
-            result.extend(reversed_notes)
-        else:
-            result.extend(notes)
-
-    return result
-
-
-def repeated_mobius_fold(notes, repetitions):
-    flipped_notes = flip_notes(notes)
-    result = list(notes)
-    for r in range(repetitions):
-        if r % 2 == 0:
-            result.extend(flipped_notes)
-        else:
-            result.extend(notes)
-
-    return result
-
-
-def flip_notes(notes, axis=None):
-    axis = axis or Tone.named('b', 3)
-    return [n.flip(axis) for n in notes]
-
-
-def horizontal_fold(notes, axis=None):
-    axis = axis or Tone.named('b', 3)
-    return [n.fold(axis) for n in notes]
-
-
-def rotate_180(notes):
-    return flip_notes(reverse_notes(notes))
-
+        return Chord(tones, self.duration)
 
