@@ -29,13 +29,13 @@ class MidiExporter(object):
         self.track = mido.MidiTrack()
 
     def append(self, score):
-        self.add_bpm(score.tempo)
+        self.add_tempo(score.tempo)
         self.add_time_signature(score.meter)
         self.add_instrument(self.instrument)
         self.add_score(score)
 
-    def add_bpm(self, bpm):
-        msg = mido.MetaMessage('set_tempo', tempo=mido.bpm2tempo(bpm))
+    def add_tempo(self, tempo):
+        msg = mido.MetaMessage('set_tempo', tempo=mido.bpm2tempo(tempo))
         self.track.append(msg)
 
     def add_time_signature(self, meter):
@@ -65,10 +65,10 @@ class MidiExporter(object):
             else:
                 raise Exception('unknown item {}'.format(item))
 
-    def map_note(self, note, initial_ticks=0):
+    def map_note(self, note, rest_ticks=0):
         midi_note = self.tone_to_midi(note.tone)
         ticks = self.duration_to_ticks(note.duration)
-        yield mido.Message('note_on', note=midi_note, time=initial_ticks)
+        yield mido.Message('note_on', note=midi_note, time=rest_ticks)
         yield mido.Message('note_off', note=midi_note, time=ticks)
 
     def tone_to_midi(self, tone):
@@ -83,11 +83,11 @@ class MidiExporter(object):
         ticks = sum(int(self.TICK / (v / 4)) for v in values)
         return ticks
 
-    def map_chord(self, chord, initial_ticks=0):
+    def map_chord(self, chord, rest_ticks=0):
         notes = [self.tone_to_midi(t) for t in chord.sorted_tones()]
         ticks = self.duration_to_ticks(chord.duration)
 
-        yield mido.Message('note_on', note=notes[0], time=initial_ticks)
+        yield mido.Message('note_on', note=notes[0], time=rest_ticks)
 
         for midi_note in notes[1:]:
             yield mido.Message('note_on', note=midi_note, time=0)
