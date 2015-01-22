@@ -1,5 +1,5 @@
 import itertools
-from tone import Tone
+from notehole.music import Tone
 
 B_AXIS = Tone(34)
 

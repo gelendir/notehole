@@ -1,6 +1,14 @@
 import itertools
 from notehole.music import Rest, Note, Chord
 
+TEMPLATE = r"""
+\version "2.18.2"
+
+\relative {start_tone} {{
+    {score}
+}}
+"""
+
 def create_lilypond_file(score, filename):
     exporter = LilypondExporter()
     exporter.append(score)
@@ -27,14 +35,6 @@ class LilypondExporter(object):
         2: 'isis',
     }
 
-    TEMPLATE = r"""
-    \version "2.18.2"
-
-    \relative {start_tone} {{
-        {score}
-    }}
-    """
-
     def __init__(self):
         self.tokens = []
         self.start_tone = None
@@ -42,8 +42,7 @@ class LilypondExporter(object):
 
     def append(self, score):
         self.find_start_tone(score)
-        for item in score:
-            self.tokens.append(self.item_to_token(item))
+        self.tokens.extend(self.format_item(item) for item in score)
 
     def find_start_tone(self, score):
         if self.start_tone:
@@ -123,7 +122,7 @@ class LilypondExporter(object):
         start_octave = self.start_tone.octave - 3
         start_tone = self.format_tone(self.start_tone, start_octave)
         score = ' '.join(self.tokens)
-        rendered = self.TEMPLATE.format(start_tone=start_tone, score=score)
+        rendered = TEMPLATE.format(start_tone=start_tone, score=score)
 
         with open(filename, 'w') as f:
             f.write(rendered)

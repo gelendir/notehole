@@ -1,9 +1,9 @@
 import re
 
-from tone import Tone, parse_tone
-from duration import Duration, parse_duration
-from rest import Rest
-from chord import Chord
+from .tone import Tone, parse_tone
+from .duration import Duration, parse_duration
+from .rest import Rest
+from .chord import Chord
 
 def parse_note(text):
     duration = parse_duration(text)
