@@ -3,3 +3,4 @@ from .tone import parse_tone, Tone
 from .duration import parse_duration, Duration
 from .rest import Rest
 from .chord import Chord
+from .score import Score

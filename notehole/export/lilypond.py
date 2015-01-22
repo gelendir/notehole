@@ -1,4 +1,3 @@
-import itertools
 from notehole.music import Rest, Note, Chord
 
 TEMPLATE = r"""
@@ -42,6 +41,7 @@ class LilypondExporter(object):
 
     def append(self, score):
         self.find_start_tone(score)
+        self.tokens.append(self.format_meter(score.meter))
         self.tokens.extend(self.format_item(item) for item in score)
 
     def find_start_tone(self, score):
@@ -117,6 +117,9 @@ class LilypondExporter(object):
         duration = self.format_duration(chord.duration)
 
         return "<{} {}>{}".format(first_tone, ' '.join(tones), duration)
+
+    def format_meter(self, meter):
+        return "\\time {}/{}".format(meter.beats, meter.bar)
 
     def save(self, filename):
         start_octave = self.start_tone.octave - 3

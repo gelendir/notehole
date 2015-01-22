@@ -1,12 +1,11 @@
 from notehole.music import Note, Rest, Chord
 import mido
 
-BPM = 120
 PIANO = 0
 
 def create_midi_file(score, filename):
     exporter = MidiExporter()
-    exporter.append(score, BPM, PIANO)
+    exporter.append(score)
     exporter.save(filename)
 
 
@@ -25,16 +24,24 @@ class MidiExporter(object):
         6: 11
     }
 
-    def __init__(self):
+    def __init__(self, instrument=PIANO):
+        self.instrument = instrument
         self.track = mido.MidiTrack()
 
-    def append(self, score, bpm, instrument=0):
-        self.add_bpm(bpm)
-        self.add_instrument(instrument)
+    def append(self, score):
+        self.add_bpm(score.tempo)
+        self.add_time_signature(score.meter)
+        self.add_instrument(self.instrument)
         self.add_score(score)
 
     def add_bpm(self, bpm):
         msg = mido.MetaMessage('set_tempo', tempo=mido.bpm2tempo(bpm))
+        self.track.append(msg)
+
+    def add_time_signature(self, meter):
+        msg = mido.MetaMessage('time_signature',
+                               numerator=meter.beats,
+                               denominator=meter.bar)
         self.track.append(msg)
 
     def add_instrument(self, instrument):
