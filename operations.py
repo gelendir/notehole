@@ -1,7 +1,7 @@
 import itertools
 from tone import Tone
 
-B_AXIS = Tone(27)
+B_AXIS = Tone(34)
 
 
 def reverse_notes(notes):
