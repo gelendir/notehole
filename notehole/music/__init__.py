@@ -4,3 +4,4 @@ from .duration import parse_duration, Duration
 from .rest import Rest
 from .chord import Chord
 from .score import Score
+from .meter import Meter
