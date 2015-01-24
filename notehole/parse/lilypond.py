@@ -4,7 +4,7 @@ import ly.document
 
 from fractions import Fraction
 from ly.music import document as music_document, items
-from notehole.music import Score, Note, Duration, Tone, Chord, Rest
+from notehole.music import Score, Note, Duration, Tone, Chord, Rest, Meter
 
 BASE_OCTAVE = 3
 
@@ -33,10 +33,15 @@ class Filter(metaclass=abc.ABCMeta):
 
 class MusicFilter(Filter):
 
+    IGNORE = (items.TimeSignature,
+              )
+
     def __iter__(self):
         item_classes = tuple(self.converters.keys())
         for item in self.items:
-            if not isinstance(item, item_classes):
+            if isinstance(item, self.IGNORE):
+                continue
+            elif not isinstance(item, item_classes):
                 raise ParseError("{} is not supported".format(item.token))
             yield item
 
@@ -179,7 +184,8 @@ class LilypondParser(object):
         relative_pitch = self.find_relative_pitch(music)
         music_list = self.find_music_list(music)
         music_filter = self.build_filters(music_list, relative_pitch)
-        return self.build_score(music_filter)
+        time_signature = self.find_time_signature(music)
+        return self.build_score(music_filter, time_signature)
 
     def find_music_list(self, music):
         music_list = music.find_child(items.MusicList)
@@ -204,7 +210,6 @@ class LilypondParser(object):
 
         pitch = first_note.pitch.copy()
         pitch.octave += BASE_OCTAVE - pitch.octave
-
         return pitch
 
     def build_filters(self, music_list, relative_pitch=None):
@@ -215,9 +220,18 @@ class LilypondParser(object):
                                         relative_pitch)
         return AbsoluteOctaveFilter(music_filter, self.converters)
 
-    def build_score(self, items):
+    def find_time_signature(self, music):
+        return music.find_child(items.TimeSignature)
+
+    def build_score(self, items, time_signature=None):
+        meter = self.convert_time_signature(time_signature) if time_signature else None
         converted_items = tuple(self.convert_item(item) for item in items)
-        return Score(items=converted_items)
+        return Score(items=converted_items, meter=meter)
+
+    def convert_time_signature(self, time_signature):
+        beats = time_signature.numerator()
+        bar = time_signature.fraction().denominator
+        return Meter(beats, bar)
 
     def convert_item(self, item):
         converter = self.converters.get(item.__class__)
