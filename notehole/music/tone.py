@@ -45,6 +45,10 @@ class Tone(object):
         self.pitch = pitch
         self.accidental = accidental
 
+    @classmethod
+    def with_octave(cls, pitch, octave, accidental=0):
+        return cls(octave * 7 + pitch, accidental)
+
     def __repr__(self):
         return "{}{}{}".format(PITCHES[self.position],
                                ACCIDENTALS[self.accidental],
