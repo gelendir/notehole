@@ -6,11 +6,13 @@ TEMPLATE = r"""
 \relative {start_tone} {{
     {score}
 }}
+
+{extra}
 """
 
-def create_lilypond_file(score, filename):
+def create_lilypond_file(score, filename, extra=""):
     exporter = LilypondExporter()
-    exporter.append(score)
+    exporter.append(score, extra)
     exporter.save(filename)
 
 
@@ -38,11 +40,13 @@ class LilypondExporter(object):
         self.tokens = []
         self.start_tone = None
         self.last_tone = None
+        self.extra = ""
 
-    def append(self, score):
+    def append(self, score, extra=""):
         self.find_start_tone(score)
         self.tokens.append(self.format_meter(score.meter))
         self.tokens.extend(self.format_item(item) for item in score)
+        self.extra += extra
 
     def find_start_tone(self, score):
         if self.start_tone:
@@ -125,7 +129,9 @@ class LilypondExporter(object):
         start_octave = self.start_tone.octave - 3
         start_tone = self.format_tone(self.start_tone, start_octave)
         score = ' '.join(self.tokens)
-        rendered = TEMPLATE.format(start_tone=start_tone, score=score)
+        rendered = TEMPLATE.format(start_tone=start_tone,
+                                   score=score,
+                                   extra=self.extra)
 
         with open(filename, 'w') as f:
             f.write(rendered)
