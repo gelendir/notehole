@@ -4,38 +4,34 @@ from notehole.music import Tone
 B_AXIS = Tone(34)
 
 
-def reverse_notes(notes):
-    return tuple(reversed(notes))
+def reverse(items):
+    return tuple(reversed(items))
 
 
-def flip_notes(notes, axis=None):
+def flip(items, axis=None):
     axis = axis or B_AXIS
-    return tuple(n.flip(axis) for n in notes)
+    return tuple(i.flip(axis) for i in items)
 
 
-def vertical_fold(notes):
-    return itertools.chain(notes, reverse_notes(notes))
+def rotate_180(items):
+    return flip(reverse(items))
 
 
-def horizontal_fold(notes, axis=None):
+def vertical_fold(items, repeats=1):
+    cycle = itertools.cycle((items, reverse(items)))
+    return _repeat_fold(cycle, repeats)
+
+
+def horizontal_fold(items, axis=None):
     axis = axis or B_AXIS
-    return tuple(n.fold(axis) for n in notes)
+    return tuple(i.fold(axis) for i in items)
 
 
-def repeated_vertical_fold(notes, repetitions):
-    cycle = itertools.cycle((notes, reverse_notes(notes)))
-    return _repeat_cycle(cycle, repetitions)
+def mobius_fold(items, repeats=1):
+    cycle = itertools.cycle((items, flip(items)))
+    return _repeat_fold(cycle, repeats)
 
 
-def _repeat_cycle(cycle, repetitions):
-    repeats = itertools.islice(cycle, repetitions)
+def _repeat_fold(cycle, repeats):
+    repeats = itertools.islice(cycle, repeats + 1)
     return itertools.chain.from_iterable(repeats)
-
-
-def repeated_mobius_fold(notes, repetitions):
-    cycle = itertools.cycle((notes, flip_notes(notes)))
-    return _repeat_cycle(cycle, repetitions)
-
-
-def rotate_180(notes):
-    return flip_notes(reverse_notes(notes))
